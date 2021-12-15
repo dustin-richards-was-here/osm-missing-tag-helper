@@ -17,7 +17,7 @@ def getSearchLink(name: str, city: str, state: str):
     return searchPrefix + urllib.parse.quote(search)
 
 result = overpass.query("""
-    nwr( """ + bbox + """)
+    nw ( """ + bbox + """)
     [amenity~"^(cafe|restaurant|fast_food)$"]
     [!opening_hours];
     out tags center;
@@ -34,7 +34,13 @@ for category in (result.ways, result.nodes, result.relations):
     for element in category:
         if firstRun:
             firstRun = False
-            query = str(element.center_lat) + "," + str(element.center_lon)
+            if type(element) is overpy.Way:
+                lat = element.center_lat
+                lon = element.center_lon
+            elif type(element) is overpy.Node:
+                lat = element.lat
+                lon = element.lon
+            query = str(lat) + "," + str(lon)
             address = nominatim.reverse(query)
             city = address.raw['address']['city']
             state = address.raw['address']['state']
